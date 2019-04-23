@@ -16,6 +16,7 @@ public class MongoBolt extends BaseBasicBolt {
 		String date = tuple.getStringByField("date");
 		String messageBody = tuple.getStringByField("messageBody");
 		if (channelName != null) {
+			System.out.println(channelName + " " + date + " " + messageBody);
 			Document document = new Document()
 					.append("channelName", channelName)
 					.append("date", date)

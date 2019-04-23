@@ -11,7 +11,7 @@ public class Topology {
 		builder.setBolt("MongoBolt", new MongoBolt()).shuffleGrouping("TwitchSpout");
 
 		Config conf = new Config();
-		conf.setDebug(true);
+		conf.setDebug(false);
 
 		new LocalCluster().submitTopology("MyFirstTopo", conf, builder.createTopology());
 	}

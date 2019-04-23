@@ -10,6 +10,9 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -22,11 +25,13 @@ public class TwitchSpout extends BaseRichSpout {
 
 	@Override
 	public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
-		TwitchClient twitchClient = TwitchConnection.getTwitchClient();
+		System.out.println("I AM A NEW TWITCH SPOUT");
+
 		this.spoutOutputCollector = spoutOutputCollector;
 		incomingMessages = new LinkedList<>();
 
-		twitchClient.getChat().joinChannel("timthetatman");
+		TwitchClient twitchClient = TwitchConnection.getTwitchClient();
+		joinChannels(twitchClient);
 		twitchClient.getEventManager().onEvent(IRCMessageEvent.class).subscribe(event -> {
 			if (event.getMessage().isPresent()) {
 				TwitchMessage newMessage = new TwitchMessage(
@@ -50,6 +55,21 @@ public class TwitchSpout extends BaseRichSpout {
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
 		outputFieldsDeclarer.declare(new Fields("channelName", "date", "messageBody"));
+	}
+
+	/**
+	 * Join all channels in the channels.txt file
+	 */
+	private void joinChannels(TwitchClient twitchClient) {
+		try (BufferedReader br = new BufferedReader(new FileReader("channels.txt"))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				twitchClient.getChat().joinChannel(line);
+				System.out.println("Joined to " + line + " channel!");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
 
