@@ -13,48 +13,37 @@ import org.apache.storm.tuple.Values;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
 public class TwitchSpout extends BaseRichSpout {
 	private SpoutOutputCollector spoutOutputCollector;
-	private Queue<TwitchMessage> incomingMessages;
+	private Queue<IRCMessageEvent> incomingEvents;
 
 	@Override
 	public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
 		System.out.println("I AM A NEW TWITCH SPOUT");
 
 		this.spoutOutputCollector = spoutOutputCollector;
-		incomingMessages = new LinkedList<>();
+		incomingEvents = new LinkedList<>();
 
 		TwitchClient twitchClient = TwitchConnection.getTwitchClient();
 		joinChannels(twitchClient);
-		twitchClient.getEventManager().onEvent(IRCMessageEvent.class).subscribe(event -> {
-			if (event.getMessage().isPresent()) {
-				TwitchMessage newMessage = new TwitchMessage(
-						event.getChannel().getName(),
-						new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()),
-						event.getMessage().get()
-				);
-				incomingMessages.add(newMessage);
-			}
-		});
+		twitchClient.getEventManager().onEvent(IRCMessageEvent.class).subscribe(event -> incomingEvents.add(event));
 	}
 
 	@Override
 	public void nextTuple() {
-		if (!incomingMessages.isEmpty()) {
-			TwitchMessage message = incomingMessages.poll();
-			spoutOutputCollector.emit(new Values(message.channelName, message.date, message.messageBody));
+		if (!incomingEvents.isEmpty()) {
+			IRCMessageEvent event = incomingEvents.poll();
+			spoutOutputCollector.emit(new Values(event));
 		}
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-		outputFieldsDeclarer.declare(new Fields("channelName", "date", "messageBody"));
+		outputFieldsDeclarer.declare(new Fields("rawEvent"));
 	}
 
 	/**
@@ -71,16 +60,4 @@ public class TwitchSpout extends BaseRichSpout {
 			e.printStackTrace();
 		}
 	}
-}
-
-class TwitchMessage {
-	TwitchMessage(String channelName, String date, String messageBody) {
-		this.channelName = channelName;
-		this.date = date;
-		this.messageBody = messageBody;
-	}
-
-	String channelName;
-	String date;
-	String messageBody;
 }

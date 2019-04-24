@@ -8,7 +8,8 @@ public class Topology {
 	public static void main(String... args) {
 		TopologyBuilder builder = new TopologyBuilder();
 		builder.setSpout("TwitchSpout", new TwitchSpout());
-		builder.setBolt("MongoBolt", new MongoBolt()).shuffleGrouping("TwitchSpout");
+		builder.setBolt("MessageBolt", new MessageBolt()).shuffleGrouping("TwitchSpout");
+		builder.setBolt("EmoteBolt", new EmoteBolt()).shuffleGrouping("MessageBolt");
 
 		Config conf = new Config();
 		conf.setDebug(false);

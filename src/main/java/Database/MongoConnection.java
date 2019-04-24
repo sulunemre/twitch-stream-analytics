@@ -8,7 +8,7 @@ import com.mongodb.client.MongoDatabase;
 public class MongoConnection {
 	private static MongoClientURI uri = new MongoClientURI(Secrets.MONGO_STRING);
 	private static MongoClient mongoClient = new MongoClient(uri);
-	private static MongoDatabase database = mongoClient.getDatabase("test");
+	private static MongoDatabase database = mongoClient.getDatabase("production");
 
 	public static MongoDatabase getDatabase() {
 		return database;
