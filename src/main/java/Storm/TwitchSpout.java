@@ -13,6 +13,7 @@ import org.apache.storm.tuple.Values;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -20,7 +21,13 @@ import java.util.Queue;
 public class TwitchSpout extends BaseRichSpout {
 	private SpoutOutputCollector spoutOutputCollector;
 	private Queue<IRCMessageEvent> incomingEvents;
+	private String channelName;
+	//private ArrayList<String> channels; // to be used with multiple channels
 
+	public TwitchSpout(String channelName) {
+		super();
+		this.channelName = channelName;
+	}
 	@Override
 	public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
 		System.out.println("I AM A NEW TWITCH SPOUT");
@@ -51,11 +58,15 @@ public class TwitchSpout extends BaseRichSpout {
 	 */
 	private void joinChannels(TwitchClient twitchClient) {
 		try (BufferedReader br = new BufferedReader(new FileReader("channels.txt"))) {
+			twitchClient.getChat().joinChannel(channelName);
+			System.out.println("Joined to " + channelName + " channel!");
+			/*
 			String line;
 			while ((line = br.readLine()) != null) {
 				twitchClient.getChat().joinChannel(line);
 				System.out.println("Joined to " + line + " channel!");
 			}
+			 */
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
