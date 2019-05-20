@@ -1,4 +1,9 @@
 language: java
 jdk: oraclejdk11
 sudo: false
+cache:
+  directories:
+  - .autoconf
+  - $HOME/.m2
 script: mvn clean verify
+
