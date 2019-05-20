@@ -57,12 +57,18 @@
 			<artifactId>json</artifactId>
 			<version>20180813</version>
 		</dependency>
-        <!-- https://mvnrepository.com/artifact/org.nanohttpd/nanohttpd -->
-        <dependency>
-            <groupId>org.nanohttpd</groupId>
-            <artifactId>nanohttpd</artifactId>
-            <version>2.3.1</version>
-        </dependency>
+		<!-- https://mvnrepository.com/artifact/org.nanohttpd/nanohttpd -->
+		<dependency>
+			<groupId>org.nanohttpd</groupId>
+			<artifactId>nanohttpd</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
+		<dependency>
+			<groupId>com.rabbitmq</groupId>
+			<artifactId>amqp-client</artifactId>
+			<version>5.7.0</version>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 </project>

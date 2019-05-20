@@ -7,9 +7,12 @@ import com.mongodb.client.MongoCollection;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import org.bson.Document;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -34,7 +37,9 @@ public class EmoteBolt extends BaseBasicBolt {
 				emoteIds.add(e.split(":")[0]);
 
 			for (String emoteId : emoteIds) {
-				BasicDBObject toBeInserted = BasicDBObject.parse(getEmoteDetails(emoteId));
+				String emoteJson = getEmoteDetails(emoteId);
+				basicOutputCollector.emit(new Values(emoteJson));
+				BasicDBObject toBeInserted = BasicDBObject.parse(emoteJson);
 				try {
 					emotesCollection.insertOne(new Document(toBeInserted.toMap()));
 					System.out.println("A new emote inserted");
@@ -48,7 +53,7 @@ public class EmoteBolt extends BaseBasicBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-
+		outputFieldsDeclarer.declare(new Fields("emoteJson"));
 	}
 
 	/**
@@ -67,7 +72,7 @@ public class EmoteBolt extends BaseBasicBolt {
 			emoteJson.put("emotion", "TO-BE-COMPLETED");
 
 			return emoteJson.toString();
-		} catch (IOException e) {
+		} catch (IOException | JSONException e) {
 			e.printStackTrace();
 			return null;
 		}

@@ -2,6 +2,7 @@ package Util;
 
 import Storm.EmoteBolt;
 import Storm.MessageBolt;
+import Storm.RabbitBolt;
 import Storm.TwitchSpout;
 import fi.iki.elonen.NanoHTTPD;
 import org.apache.storm.Config;
@@ -43,6 +44,7 @@ public class WebServer extends NanoHTTPD {
 			builder.setSpout("TwitchSpout", new TwitchSpout(parms.get("channel")));
 			builder.setBolt("MessageBolt", new MessageBolt()).shuffleGrouping("TwitchSpout");
 			builder.setBolt("EmoteBolt", new EmoteBolt()).shuffleGrouping("MessageBolt");
+			builder.setBolt("RabbitBolt", new RabbitBolt()).shuffleGrouping("EmoteBolt");
 
 			Config conf = new Config();
 			conf.setDebug(false);
