@@ -16,5 +16,17 @@ public class Topology {
 			System.out.println("Could not run web server");
 		}
 
+		// Run Apache Storm
+		TopologyBuilder builder = new TopologyBuilder();
+		builder.setSpout("TwitchSpout", new TwitchSpout());
+		builder.setBolt("MessageBolt", new MessageBolt()).shuffleGrouping("TwitchSpout");
+		builder.setBolt("EmoteBolt", new EmoteBolt()).shuffleGrouping("MessageBolt");
+		builder.setBolt("RabbitBolt", new RabbitBolt()).shuffleGrouping("EmoteBolt");
+
+		Config conf = new Config();
+		conf.setDebug(false);
+
+		new LocalCluster().submitTopology("MyFirstTopo", conf, builder.createTopology());
+
 	}
 }

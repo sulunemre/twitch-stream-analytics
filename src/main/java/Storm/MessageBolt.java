@@ -20,20 +20,22 @@ public class MessageBolt extends BaseBasicBolt {
 		MongoCollection<Document> messagesCollection = MongoConnection.getDatabase().getCollection("messages");
 
 		IRCMessageEvent rawEvent = (IRCMessageEvent) tuple.getValueByField("rawEvent");
+		String channelOfMessage = rawEvent.getChannel().getName();
 		if (rawEvent.getMessage().isPresent()) {
 			Document document = new Document()
-					.append("channelName", rawEvent.getChannel().getName())
+					.append("channelName", channelOfMessage)
 					.append("date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()))
 					.append("messageBody", rawEvent.getMessage().get());
 
 			messagesCollection.insertOne(document);
 		}
 
-		basicOutputCollector.emit(new Values(rawEvent.getTagValue("emotes")));
+
+		basicOutputCollector.emit(new Values(rawEvent.getTagValue("emotes"), channelOfMessage));
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-		outputFieldsDeclarer.declare(new Fields("rawEmotes"));
+		outputFieldsDeclarer.declare(new Fields("rawEmotes", "channelOfMessage"));
 	}
 }

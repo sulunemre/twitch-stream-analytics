@@ -1,25 +1,18 @@
 package Util;
 
-import Storm.EmoteBolt;
-import Storm.MessageBolt;
-import Storm.RabbitBolt;
-import Storm.TwitchSpout;
 import fi.iki.elonen.NanoHTTPD;
-import org.apache.storm.Config;
-import org.apache.storm.LocalCluster;
-import org.apache.storm.topology.TopologyBuilder;
 
 import java.io.IOException;
 import java.util.Map;
 
 public class WebServer extends NanoHTTPD {
-	private TopologyBuilder builder;
+
 
 	public WebServer(int port) throws IOException {
 		super(port);
 		start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
 		System.out.println("\nRunning! Point your browsers to http://localhost:" + port + "/ \n");
-		builder = new TopologyBuilder(); // Initialize Apache Storm
+
 	}
 
 	/*
@@ -40,16 +33,7 @@ public class WebServer extends NanoHTTPD {
 			msg += "<form action='?' method='get'>\n  <p>Channel name: <input type='text' name='channel'></p>\n" + "</form>\n";
 		} else {
 			msg += "<p>Hello, " + parms.get("channel") + "!</p>";
-			// Run Apache Storm
-			builder.setSpout("TwitchSpout", new TwitchSpout(parms.get("channel")));
-			builder.setBolt("MessageBolt", new MessageBolt()).shuffleGrouping("TwitchSpout");
-			builder.setBolt("EmoteBolt", new EmoteBolt()).shuffleGrouping("MessageBolt");
-			builder.setBolt("RabbitBolt", new RabbitBolt()).shuffleGrouping("EmoteBolt");
 
-			Config conf = new Config();
-			conf.setDebug(false);
-
-			new LocalCluster().submitTopology("MyFirstTopo", conf, builder.createTopology());
 		}
 		return newFixedLengthResponse(msg + "</body></html>\n");
 	}
