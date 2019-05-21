@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Gamedev Canvas Workshop</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+<script type="text/javascript">
+	//
+	// This script block handles all the Socket-IO communication
+	var handleServerRequest = function (data) {
+		console.log({
+			source: 'server',
+			action: 'request',
+			data: data
+		});
+	};
+	var socket = io.connect('http://139.179.103.23:8081'); //, {port:81}
+	socket.on('server request', handleServerRequest);
+</script>
+
+</body>
+</html>

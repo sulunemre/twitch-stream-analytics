@@ -12,6 +12,7 @@
   "dependencies": {
     "amqplib": "^0.5.3",
     "express": "^4.17.0",
-    "json-groupby": "^1.1.0"
+    "json-groupby": "^1.1.0",
+    "socket.io": "^2.2.0"
   }
 }
