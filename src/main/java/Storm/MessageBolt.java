@@ -20,7 +20,11 @@ public class MessageBolt extends BaseBasicBolt {
 		MongoCollection<Document> messagesCollection = MongoConnection.getDatabase().getCollection("messages");
 
 		IRCMessageEvent rawEvent = (IRCMessageEvent) tuple.getValueByField("rawEvent");
-		String channelOfMessage = rawEvent.getChannel().getName();
+		String channelOfMessage = null;
+		try {
+			channelOfMessage = rawEvent.getChannel().getName();
+		} catch (Exception ignored) {
+		}
 		if (rawEvent.getMessage().isPresent()) {
 			Document document = new Document()
 					.append("channelName", channelOfMessage)

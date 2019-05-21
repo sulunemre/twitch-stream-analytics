@@ -37,7 +37,9 @@ public class RabbitBolt extends BaseBasicBolt {
 		try {
 			if (emoteJson != null) {
 				emoteJson = addTimestampAndChannelToEmoteJson(emoteJson, channelOfMessage);
-				System.out.println(emoteJson);
+				System.out.println(getHumanReadableEmoteDetails(emoteJson));
+
+				// Add to message queue
 				channel.basicPublish("", QUEUE_NAME, null, emoteJson.getBytes());
 			}
 		} catch (IOException e) {
@@ -55,5 +57,11 @@ public class RabbitBolt extends BaseBasicBolt {
 		emote.put("timestamp", String.valueOf((System.currentTimeMillis())));
 		emote.put("channelOfMessage", channelOfMessage);
 		return emote.toString();
+	}
+
+	private String getHumanReadableEmoteDetails(String emoteJson) {
+		JSONObject emote = new JSONObject(emoteJson);
+		return String.join(", ", emote.getString("channelOfMessage"), emote.getString("code"), emote.getString("emotion"));
+
 	}
 }
