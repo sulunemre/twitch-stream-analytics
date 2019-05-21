@@ -1,44 +1,57 @@
-//{"emoticon_set":0,"channel_name":null,"code":"FrankerZ","emotion":"TO-BE-COMPLETED","_id":65,"channel_id":null,"timestamp":"1558381101999"}
+//{ emoticon_set: 0,
+//   channel_name: null,
+//   code: 'PogChamp',
+//   emotion: 'excited',
+//   channelOfMessage: 'cohhcarnage',
+//   _id: 88,
+//   channel_id: null,
+//   timestamp: '1558448502386' }
 var port = 5672;
-var http = require("http");
 var amqp = require('amqplib/callback_api');
+var groupBy = require('json-groupby')
 
-var IPtoConnect = 'amqp://139.179.103.146';
+var IPtoConnect = 'amqp://139.179.248.141';
+var channelsJSON;
 var messages = [];
-var emotionsJSON;
 
 //remove messages that was sent more than 10 minutes ago.
 function filterMessagesBy10Minutes() {
     messages = messages.filter(function (message) {
-        return (Date.now() / (60 * 1000) - parseInt(message.timestamp) / (60 * 1000)) < 10;
+        return (Date.now() - parseInt(message.timestamp)) / (60 * 1000) < 10;
     });
     groupMessagesByEmotions();
+
 }
 
 //Group and count the number of messages belonging to each emotion
 //and assign this to emotionsJSON variable.
 function groupMessagesByEmotions() {
-    var key = 'emotion';
-    emotionsJSON = [];
-    for (var i = 0; i < messages.length; i++) {
-        var added = false;
-        for (var j = 0; j < emotionsJSON.length; j++) {
-            if (emotionsJSON[j][key] == messages[i][key]) {
-                emotionsJSON[j].items.push(messages[i]);
-                added = true;
-                break;
+    channelsJSON = groupBy(messages, ['channelOfMessage'], ['emotion'])
+    console.log("************")
+    for (var channel in channelsJSON) {
+        for (let i = 0; i < channelsJSON[channel]["emotion"].length; i++) {
+
+            //currentEmotion will be one of "disgust", "amused", "love" ...
+            let currentEmotion = channelsJSON[channel]["emotion"][i];
+
+            //We don't need to keep emotions named "TO-BE-COMPLETED"
+            if (currentEmotion === "TO-BE-COMPLETED")
+                continue;
+
+            //if we see this emotion first time in this chat
+            //give it number 1 else increment it.
+            if (channelsJSON[channel][currentEmotion] == undefined) {
+                channelsJSON[channel][currentEmotion] = 1;
+            } else {
+                channelsJSON[channel][currentEmotion] += 1;
             }
         }
-        if (!added) {
-            var entry = {items: []};
-            entry[key] = messages[i][key];
-            entry.items.push(messages[i]);
-            emotionsJSON.push(entry);
-        }
+        //after traversing the list of emotions and counting,
+        //we don't need them as an array inside our JSON.
+        delete channelsJSON[channel]["emotion"];
+        //console.log(channelsJSON[channel])
     }
-    console.log("********************************");
-    for (var i = 0; i < emotionsJSON.length; i++)
-        console.log(emotionsJSON[i].emotion + " - " + Object.keys(emotionsJSON[i].items).length);
+    console.log(channelsJSON)
 }
 
 amqp.connect(IPtoConnect, function (error0, connection) {
@@ -70,24 +83,3 @@ amqp.connect(IPtoConnect, function (error0, connection) {
         });
     });
 });
-/*
-//AJAX CONNECTION
-var server = http.createServer();
-
-server.on('request', request);
-server.listen(port);
-function request(request, response) {
-    var store = '';
-
-    request.on('data', function(data) 
-    {
-        store += data;
-    });
-    request.on('end', function() 
-    {  console.log(store);
-        response.setHeader("Content-Type", "text/json");
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.end(store)
-	});
-}  
-*/
