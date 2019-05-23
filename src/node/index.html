@@ -1,29 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <title>Gamedev Canvas Workshop</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+	<meta charset="utf-8"/>
+	<title>Twitch Emotion Graph</title>
 </head>
 <body>
-<div id="data_container"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-<script type="text/javascript">
-	var channelsJSON;
-	// This script block handles all the Socket-IO communication
-	var handleServerRequest = function (data) {
-		channelsJSON = data;
+<div id="chartContainer0" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer1" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer2" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer3" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer4" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer5" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer6" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer7" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer8" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer9" style="height: 300px; width: 100%;"></div>
 
-		// Write to screen
-		// $('#data_container').text("");
-		// for (var channel in channelsJSON) {
-		// 	$('#data_container').append(channel + ": " + JSON.stringify(channelsJSON[channel]) + "</br>");
-		// }
-		console.log(channelsJSON);
-	};
-	var socket = io.connect('http://localhost:8081'); //, {port:81}
-	socket.on('server request', handleServerRequest);
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+<script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+<script type="text/javascript">
+    function createChart(data, index) {
+        var dataPoints = data.dataPoints;
+
+        var chart = new CanvasJS.Chart("chartContainer" + index, {
+            animationEnabled: false,
+            theme: "light2",
+            title: {
+                text: data.channelName
+            },
+            axisY: {
+                title: "Amount",
+                titleFontSize: 24
+            },
+            axisX: {
+                title: "Emotions",
+                titleFontSize: 24
+            },
+            data: [{
+                type: "column",
+                dataPoints: dataPoints
+            }]
+        });
+
+
+        chart.render();
+    }
+
+
+    // This script block handles all the Socket-IO communication
+    var handleServerRequest = function (data) {
+        console.log(data);
+        for (var i = 0; i < data.length; i++)
+            createChart(data[i], i);
+    };
+    var socket = io.connect('http://139.179.55.138:8081');
+    socket.on('server request', handleServerRequest);
 </script>
 
 </body>
 </html>
+
+
+
