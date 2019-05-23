@@ -1,11 +1,17 @@
 package Storm;
 
+import Util.TopChannelSaver;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.topology.TopologyBuilder;
 
+import java.io.IOException;
+
 public class Topology {
-	public static void main(String... args) {
+    public static void main(String... args) throws IOException {
+        // saves the top 10 most viewed live channels to "channels.txt"
+        TopChannelSaver.saveTopChannels();
+
 		// Run Apache Storm
 		TopologyBuilder builder = new TopologyBuilder();
 		builder.setSpout("TwitchSpout", new TwitchSpout());
