@@ -116,6 +116,10 @@ io.sockets.on('connection', function (socket) {
 	setInterval(sendJsonToClient, periodInMilliseconds);
 
 	function sendJsonToClient() {
+
+		//Sort data according to channel names so that
+		arrayOfChannelJSONs.sort((a, b) => a.channelName > b.channelName);
+
 		socket.emit('server request', arrayOfChannelJSONs);
 	}
 });
