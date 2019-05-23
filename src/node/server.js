@@ -5,7 +5,7 @@ var app = require('http').createServer(handler),
 	fs = require('fs');
 
 var refreshTimeInSeconds = 5;
-var slidingWindowIntervalInMinutes = 0.5;
+var slidingWindowIntervalInMinutes = 5;
 var port = 8081;
 var messageQueueIP = 'amqp://139.179.55.138';
 
