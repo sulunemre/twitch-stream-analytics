@@ -44,7 +44,7 @@ function groupMessagesByEmotions() {
 			if (currentEmotion === "TO-BE-COMPLETED")
 				continue;
 
-			JSONofCurrentEmotion.emotion = currentEmotion;
+			JSONofCurrentEmotion.label = currentEmotion;
 
 			//if we see this emotion first time in this chat
 			//give it number 1 else increment it.
