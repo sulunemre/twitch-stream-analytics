@@ -7,7 +7,7 @@ var app = require('http').createServer(handler),
 var refreshTimeInSeconds = 5;
 var slidingWindowIntervalInMinutes = 0.5;
 var port = 8081;
-var messageQueueIP = 'amqp://139.179.55.205';
+var messageQueueIP = 'amqp://139.179.55.138';
 
 var channelsJSONgroupedByEmotions;
 var arrayOfChannelJSONs;
@@ -32,7 +32,9 @@ function groupMessagesByEmotions() {
 	arrayOfChannelJSONs = []
 	console.log("************")
 	for (var channel in channelsJSONgroupedByEmotions) {
-		var JSONofCurrentChannel = {"channelName": channel, "emotions": {}};
+		var JSONofCurrentChannel = {"channelName": channel, "dataPoints": []};
+		channelsJSONgroupedByEmotions[channel]["emotion"].sort();
+		var JSONofCurrentEmotion = {}
 		for (let i = 0; i < channelsJSONgroupedByEmotions[channel]["emotion"].length; i++) {
 
 			//currentEmotion will be one of "disgust", "amused", "love" ...
@@ -42,13 +44,24 @@ function groupMessagesByEmotions() {
 			if (currentEmotion === "TO-BE-COMPLETED")
 				continue;
 
+			JSONofCurrentEmotion.emotion = currentEmotion;
+
 			//if we see this emotion first time in this chat
 			//give it number 1 else increment it.
-			if (JSONofCurrentChannel["emotions"][currentEmotion] == undefined) {
-				JSONofCurrentChannel["emotions"][currentEmotion] = 1;
+			if (JSONofCurrentEmotion.y == undefined) {
+				JSONofCurrentEmotion.y = 1;
 			} else {
-				JSONofCurrentChannel["emotions"][currentEmotion] += 1;
+				JSONofCurrentEmotion.y += 1;
 			}
+
+			// If this is the last element of a channel's array of emotions or the next
+			// emotion is different than this emotion, put current emotion into dataPoint.
+			if (i + 1 == channelsJSONgroupedByEmotions[channel]["emotion"].length ||
+				channelsJSONgroupedByEmotions[channel]["emotion"][i] != channelsJSONgroupedByEmotions[channel]["emotion"][i + 1]) {
+				JSONofCurrentChannel.dataPoints.push(JSONofCurrentEmotion);
+				JSONofCurrentEmotion = {};
+			}
+
 		}
 		//after traversing the list of emotions and counting,
 		//we don't need them as an array inside our JSON.
