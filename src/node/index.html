@@ -15,13 +15,13 @@
 		channelsJSON = data;
 
 		// Write to screen
-		$('#data_container').text("");
-		for (var channel in channelsJSON) {
-			$('#data_container').append(channel + ": " + JSON.stringify(channelsJSON[channel]) + "</br>");
-		}
+		// $('#data_container').text("");
+		// for (var channel in channelsJSON) {
+		// 	$('#data_container').append(channel + ": " + JSON.stringify(channelsJSON[channel]) + "</br>");
+		// }
 		console.log(channelsJSON);
 	};
-	var socket = io.connect('http://139.179.103.23:8081'); //, {port:81}
+	var socket = io.connect('http://localhost:8081'); //, {port:81}
 	socket.on('server request', handleServerRequest);
 </script>
 

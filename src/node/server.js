@@ -7,9 +7,10 @@ var app = require('http').createServer(handler),
 var refreshTimeInSeconds = 5;
 var slidingWindowIntervalInMinutes = 0.5;
 var port = 8081;
-var messageQueueIP = 'amqp://10.76.225.59';
+var messageQueueIP = 'amqp://139.179.55.205';
 
-var channelsJSON;
+var channelsJSONgroupedByEmotions;
+var arrayOfChannelJSONs;
 var messages = [];
 
 /**
@@ -27,13 +28,15 @@ function filterMessagesByMinutes(minutes) {
  * and assign this to emotionsJSON variable.
  */
 function groupMessagesByEmotions() {
-	channelsJSON = groupBy(messages, ['channelOfMessage'], ['emotion'])
+	channelsJSONgroupedByEmotions = groupBy(messages, ['channelOfMessage'], ['emotion'])
+	arrayOfChannelJSONs = []
 	console.log("************")
-	for (var channel in channelsJSON) {
-		for (let i = 0; i < channelsJSON[channel]["emotion"].length; i++) {
+	for (var channel in channelsJSONgroupedByEmotions) {
+		var JSONofCurrentChannel = {"channelName": channel, "emotions": {}};
+		for (let i = 0; i < channelsJSONgroupedByEmotions[channel]["emotion"].length; i++) {
 
 			//currentEmotion will be one of "disgust", "amused", "love" ...
-			let currentEmotion = channelsJSON[channel]["emotion"][i];
+			let currentEmotion = channelsJSONgroupedByEmotions[channel]["emotion"][i];
 
 			//We don't need to keep emotions named "TO-BE-COMPLETED"
 			if (currentEmotion === "TO-BE-COMPLETED")
@@ -41,17 +44,18 @@ function groupMessagesByEmotions() {
 
 			//if we see this emotion first time in this chat
 			//give it number 1 else increment it.
-			if (channelsJSON[channel][currentEmotion] == undefined) {
-				channelsJSON[channel][currentEmotion] = 1;
+			if (JSONofCurrentChannel["emotions"][currentEmotion] == undefined) {
+				JSONofCurrentChannel["emotions"][currentEmotion] = 1;
 			} else {
-				channelsJSON[channel][currentEmotion] += 1;
+				JSONofCurrentChannel["emotions"][currentEmotion] += 1;
 			}
 		}
 		//after traversing the list of emotions and counting,
 		//we don't need them as an array inside our JSON.
-		delete channelsJSON[channel]["emotion"];
+		delete channelsJSONgroupedByEmotions[channel]["emotion"];
+		arrayOfChannelJSONs.push(JSONofCurrentChannel);
 	}
-	console.log(channelsJSON)
+	console.log(channelsJSONgroupedByEmotions)
 }
 
 amqp.connect(messageQueueIP, function (error0, connection) {
@@ -99,6 +103,6 @@ io.sockets.on('connection', function (socket) {
 	setInterval(sendJsonToClient, periodInMilliseconds);
 
 	function sendJsonToClient() {
-		socket.emit('server request', channelsJSON);
+		socket.emit('server request', arrayOfChannelJSONs);
 	}
 });
